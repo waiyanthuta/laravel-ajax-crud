@@ -79,7 +79,8 @@ class StudentController extends Controller
      */
     public function edit($id)
     {
-        //
+        $students = Student::find($id);
+        return response()->json($students);
     }
 
     /**
@@ -102,6 +103,7 @@ class StudentController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Student::find($id)->delete();
+        return response()->json(['success'=>'Student deleted successfully']);
     }
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="_token" content="{{ csrf_token() }}">
     <title>Ajex Crud</title>
     <!-- CSS only -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
@@ -43,7 +44,7 @@
                     <h4 class="modal-title" id="modalHeading"></h4>
                 </div>
                 <div class="modal-body">
-                    <form id="studentForm" name="studentForm" class="form-horizontal">@csrf
+                    <form id="studentForm" name="studentForm" class="form-horizontal">@csrf  
                         <input type="hidden" name="student_id" id="student_id">
                         <div class="form-group">
                             Name: <br>
@@ -69,11 +70,7 @@
 </body>
 <script type="text/javascript">
     $(function(){
-        $.ajaxSetup({
-            headers:{
-                'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')
-            }
-        })
+        $.ajaxSetup({ headers: { 'csrftoken' : '{{ csrf_token() }}' } });
         var table = $(".data-table").DataTable({
             serverSide : true,
             processing : true,
@@ -88,7 +85,7 @@
             $("#createNewStudent").click(function(){
                 $("#student_id").val();
                 $("#studentForm").trigger("reset");
-                $("#modalHeading").html('Add Student');
+                $("#modalHeading").html("Add Student");
                 $("#ajaxModal").modal('show');
             });
             $("#saveBtn").click(function(e){
@@ -109,9 +106,32 @@
                         console.log('Error:',data);
                         $("#saveBtn").html('Save')
                     }
+                });
+            });
+            $('body').on('click','.deleteStudent', function(){
+                var student_id = $(this).data('id');
+                confirm("Are you sure you want to delete?!");
+                $.ajax({
+                    type:"DELETE",
+                    url:"{{route('students.store')}}"+'/'+student_id,
+                    success:function(data){
+                        table.draw();
+                    },
+                    error:function(data){
+                        console.log('Error:',data);
+                    }
                 })
             });
-            // $('body').on('click','.deleteStudent'.function(){})
-    })
+            $('body').on('click','.editStudent', function(){
+                var student_id = $(this).data('id');
+                $.get("{{route('students.index')}}"+'/'+student_id+"/edit",function(data){
+                    $("#modalHeading").html("Edit Student");
+                    $("#ajaxModal").modal('show');
+                    $("#student_id").val(data.id);
+                    $("#name").val(data.name);
+                    $("#email").val(data.email);
+                })
+            });
+    }); 
 </script>
 </html>
